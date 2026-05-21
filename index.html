@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星空コスメシミュレーター 〜今日の私に、一番似合う星の輝きを〜</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 手描き風Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 🎨 Style C: 手書き・エモい質感・星のデザイン 🎨 */
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255, 230, 240, 0.4), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(230, 230, 255, 0.4), transparent 50%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M15 10 L20 25 L35 20 L25 35 L40 40 L25 45 L35 60 L20 55 L15 70 L10 55 L-5 60 L5 45 L-10 40 L5 35 L-5 20 L10 25 Z" fill="rgba(255, 215, 0, 0.15)"/></svg>'), 
+                #fffdf9;
+            color: #5d4a4a;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .title-with-stars::before, .title-with-stars::after {
+            content: '✦'; font-size: 1.2em; color: #ffd700; margin: 0 10px;
+        }
+
+        .sketch-button {
+            border: 3px solid #5d4a4a;
+            border-radius: 20px 5px 20px 5px / 5px 20px 5px 20px;
+            background: #fff;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 8px 16px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sketch-button:hover { background: #ffe6f0; transform: scale(1.03) rotate(-1deg); }
+        .sketch-button.active { background: #db2777; color: #fff; border-color: #db2777; }
+
+        .cosme-card {
+            background: #fff; border: 3px solid #5d4a4a; border-radius: 16px;
+            box-shadow: 6px 6px 0 rgba(93, 74, 74, 0.25);
+            transition: all 0.25s ease; position: relative;
+        }
+        .cosme-card:hover { transform: translateY(-4px) rotate(0.5deg); }
+        .cosme-card.selected { background: #fff0f5; border-color: #db2777; box-shadow: 6px 6px 0 rgba(219, 39, 119, 0.25); }
+
+        .link-button {
+            background: #5d4a4a; color: #fffdf9; border: 2px solid #5d4a4a;
+            padding: 6px 14px; border-radius: 8px; font-size: 0.85em;
+            display: inline-block; transition: all 0.2s; font-weight: bold;
+        }
+        .link-button:hover { background: #fff; color: #5d4a4a; transform: scale(1.05); }
+
+        .budget-bar-container { border: 3px solid #5d4a4a; background: #fffdf9; border-radius: 12px; overflow: hidden; height: 24px; width: 100%; }
+        .budget-bar-fill { height: 100%; background: repeating-linear-gradient(-45deg, #ffe6f0, #ffe6f0 10px, #ffd1e0 10px, #ffd1e0 20px); transition: width 0.3s ease; }
+
+        .color-preview-circle { width: 110px; height: 110px; border: 4px solid #5d4a4a; border-radius: 50%; box-shadow: 6px 6px 0 rgba(93, 74, 74, 0.15); transition: all 0.4s ease; }
+
+        .nav-tab { border-bottom: 3px solid transparent; font-weight: bold; transition: all 0.2s; background: none; cursor: pointer; }
+        .nav-tab.active { border-bottom-color: #5d4a4a; color: #db2777; }
+
+        .border-3 { border-width: 3px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+<div class="max-w-7xl mx-auto">
+    <!-- ヘッダー -->
+    <header class="text-center mb-8 p-6 border-b-4 border-double border-[#5d4a4a]">
+        <h1 class="title-with-stars text-3xl md:text-5xl font-bold">星空コスメシミュレーター</h1>
+        <p class="text-xs md:text-sm mt-3 opacity-85">✦ あなたの今日に、魔法をかけるコスメ診断 ✦</p>
+        
+        <nav class="flex justify-center gap-6 md:gap-12 mt-8 text-sm md:text-base">
+            <button id="tab-search" class="nav-tab active pb-2" onclick="switchPage('search')">✦ コスメ診断</button>
+            <button id="tab-mycart" class="nav-tab pb-2" onclick="switchPage('mycart')">✦ お気に入り (<span id="cart-count">0</span>)</button>
+            <button id="tab-info" class="nav-tab pb-2" onclick="switchPage('info')">✦ 使い方ガイド</button>
+        </nav>
+    </header>
+
+    <!-- ページ 1: コスメ診断 -->
+    <div id="page-search" class="space-y-8">
+        <section class="max-w-4xl mx-auto p-6 border-3 border-[#5d4a4a] rounded-2xl bg-white shadow-sm">
+            <h2 class="text-xl font-bold mb-6 text-center">✨ 今日のあなたを教えて？ ✨</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 左側：お天気 -->
+                <div class="space-y-4 p-4 border-2 border-dashed border-[#5d4a4a]/30 rounded-xl text-center">
+                    <h3 class="text-sm font-bold">🌦️ お天気自動スキャン</h3>
+                    <div class="flex justify-around items-center bg-[#fffdf9] p-3 rounded-lg border border-[#5d4a4a]/20">
+                        <div><span class="block text-[10px] opacity-60">気温</span><span id="weather-temp" class="font-bold text-sm">-- ℃</span></div>
+                        <div class="text-2xl" id="weather-icon">❔</div>
+                        <div><span class="block text-[10px] opacity-60">湿度</span><span id="weather-humidity" class="font-bold text-sm">-- %</span></div>
+                    </div>
+                    <button id="btn-scan" class="sketch-button w-full text-xs" onclick="scanWeather()">現在地をスキャン</button>
+                    <p id="weather-advice" class="text-[10px] text-rose-500 font-bold min-h-[1.5em] mt-2"></p>
+                </div>
+
+                <!-- 右側：追加診断 -->
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-xs font-bold mb-2">✦ パーソナルカラー</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="tone-warm" class="sketch-button py-1.5 text-xs active" onclick="setTone('Warm')">☀️ イエベ</button>
+                            <button id="tone-cool" class="sketch-button py-1.5 text-xs" onclick="setTone('Cool')">🌙 ブルベ</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold mb-2">✦ なりたい質感</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="finish-glow" class="sketch-button py-1.5 text-xs active" onclick="setFinish('Glow')">💎 ツヤ肌</button>
+                            <button id="finish-matte" class="sketch-button py-1.5 text-xs" onclick="setFinish('Matte')">☁️ マット</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 手動補足 -->
+            <div class="mt-8 pt-6 border-t border-[#5d4a4a]/10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xs font-bold mb-2 text-center">今の季節</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-summer" class="sketch-button py-1.5 text-xs active" onclick="setSeason('Summer')">🍉 夏 (Summer)</button>
+                        <button id="btn-winter" class="sketch-button py-1.5 text-xs" onclick="setSeason('Winter')">⛄ 冬 (Winter)</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold mb-2 text-center">お肌の悩み</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-dry" class="sketch-button py-1.5 text-xs active" onclick="setConcern('Dry')">💧 乾燥 (Dry)</button>
+                        <button id="btn-oily" class="sketch-button py-1.5 text-xs" onclick="setConcern('Oily')">✨ テカリ (Oily)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- カテゴリ -->
+        <section class="max-w-4xl mx-auto flex flex-wrap gap-2 justify-center">
+            <button id="category-all" class="sketch-button py-1.5 px-4 text-xs active" onclick="setCategory('All')">すべて</button>
+            <button id="category-base" class="sketch-button py-1.5 px-4 text-xs" onclick="setCategory('Base')">💄 ベース</button>
+            <button id="category-lip" class="sketch-button py-1.5 px-4 text-xs" onclick="setCategory('Lip')">💋 リップ</button>
+            <button id="category-eye" class="sketch-button py-1.5 px-4 text-xs" onclick="setCategory('Eye')">👁️ アイ</button>
+            <button id="category-cheek" class="sketch-button py-1.5 px-4 text-xs" onclick="setCategory('Cheek')">🌸 チーク・ハイ</button>
+        </section>
+
+        <main class="max-w-7xl mx-auto px-4">
+            <div id="cosme-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </main>
+    </div>
+
+    <!-- お気に入り -->
+    <div id="page-mycart" class="space-y-8 hidden px-4">
+        <section class="border-3 border-[#5d4a4a] p-6 rounded-2xl bg-white max-w-4xl mx-auto">
+            <h2 class="text-2xl mb-6 font-bold title-with-stars text-center">私のお気に入りキープリスト ✦</h2>
+            <div id="cart-list" class="grid grid-cols-1 gap-4 mb-8"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t-3 border-dashed border-[#5d4a4a]/20">
+                <div class="space-y-4">
+                    <h3 class="text-base font-bold flex items-center gap-2">💰 合計金額</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-baseline"><span id="total-price" class="text-3xl font-bold text-rose-600">¥ 0</span></div>
+                        <div class="budget-bar-container"><div id="budget-bar-fill" class="budget-bar-fill" style="width: 0%;"></div></div>
+                        <div class="flex justify-between text-xs font-bold items-center mt-2">
+                            <span id="total-percent">0%</span>
+                            <div class="flex items-center gap-1">
+                                <span>予算：¥</span>
+                                <input type="number" id="budget-input" value="15000" step="500" min="0" class="w-20 border-b-2 border-[#5d4a4a] outline-none text-center bg-transparent font-bold" oninput="updateBudget()">
+                            </div>
+                            <span id="odor-meter" class="text-2xl">😊</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center space-y-3 bg-[#fffdf9] p-4 border-2 border-[#5d4a4a] rounded-xl">
+                    <h3 class="text-sm font-bold">🎨 代表カラー丸窓</h3>
+                    <div class="flex items-center gap-4">
+                        <div id="color-preview-circle" class="color-preview-circle flex items-center justify-center bg-white"></div>
+                        <div class="text-left font-mono font-bold text-sm" id="color-code">#???</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 使い方 -->
+    <div id="page-info" class="space-y-8 hidden px-4">
+        <section class="border-3 border-[#5d4a4a] p-6 rounded-2xl bg-white max-w-2xl mx-auto space-y-4">
+            <h2 class="text-xl font-bold text-center title-with-stars">✦ 楽しみ方ガイド ✦</h2>
+            <div class="text-sm space-y-2">
+                <p>1. <strong>スキャン</strong>ボタンで今日のお天気をセット。</p>
+                <p>2. <strong>イエベ・ブルベ</strong>や<strong>ツヤ・マット</strong>を選んで診断。</p>
+                <p>3. ほしいコスメをタップして<strong>キープ</strong>。</p>
+                <p>4. お気に入りタブで<strong>予算</strong>を打ち込んでお買い物計画！</p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="text-center mt-12 pt-6 border-t-2 border-[#5d4a4a] opacity-60 text-xs">
+        <p>&copy; 2026 さち / デジタル総合演習</p>
+    </footer>
+</div>
+
+<script>
+    const cosmesticsData = [
+        // --- プチプラ・ドラコス ---
+        { id: "can_01", name: "マシュマロフィニッシュパウダー", brand: "CANMAKE", image: "www.canmake.com/item/image/31/sub_01.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 1034, url: "https://www.canmake.com/", color: "#F6E6D5" },
+        { id: "cez_01", name: "パールグロウハイライト", brand: "CEZANNE", image: "www.cezanne.co.jp/lineup/assets_c/2021/04/4939553041122-thumb-800x800-60.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Cheek", price: 660, url: "https://www.cezanne.co.jp/", color: "#FFF5EE" },
+        { id: "kat_01", name: "リップモンスター", brand: "KATE", image: "www.nomorerules.net/pickup/lip_monster/img/monster_01.png", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 1540, url: "https://www.nomorerules.net/", color: "#B22222" },
+        { id: "exc_01", name: "スキニーリッチシャドウ", brand: "excel", image: "noevirgroup.jp/excel/img/goods/L/48809.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1650, url: "https://noevirgroup.jp/excel/", color: "#D2B48C" },
+        { id: "maj_01", name: "ラッシュエキスパンダー", brand: "MAJOLICA MAJORCA", image: "www.shiseido.co.jp/mj/items/img/item_0045.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1210, url: "https://www.shiseido.co.jp/mj/", color: "#000000" },
+        { id: "vis_01", name: "エッセンス リッププランパー", brand: "Visée", image: "www.kose.co.jp/visee/item/images/lip/essence_lip_plumper/img_main.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 1430, url: "https://www.kose.co.jp/visee/", color: "#FFC0CB" },
+        { id: "chi_01", name: "口紅 S", brand: "chifure", image: "www.chifure.co.jp/products/img/lipstick_s.png", season: "Winter", concern: "Dry", tone: "Warm", finish: "Matte", category: "Lip", price: 385, url: "https://www.chifure.co.jp/", color: "#DC143C" },
+        { id: "ope_01", name: "リップティント N", brand: "OPERA", image: "www.opera-net.jp/images/items/liptint/main_v2.png", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 1650, url: "https://www.opera-net.jp/", color: "#FF6347" },
+        { id: "bid_01", name: "つやぷるリップR", brand: "b idol", image: "bidolbrand.com/wp-content/uploads/2023/03/bidol_lip_r_01.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 1540, url: "https://www.bidolbrand.com/", color: "#DB7093" },
+        { id: "fuj_01", name: "ニュアンスラップティント", brand: "Fujiko", image: "fujikobrand.com/wp-content/uploads/2021/02/fujiko_wrap_tint_01.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Glow", category: "Lip", price: 1408, url: "https://fujikobrand.com/", color: "#E9967A" },
+        { id: "who_01", name: "アイブロウパウダー", brand: "WHOMEE", image: "whomee.jp/img/goods/L/4589404140011.jpg", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1980, url: "https://whomee.jp/", color: "#8B4513" },
+        { id: "bab_01", name: "ニュアンスカラーライナー", brand: "Babymee", image: "babymee.jp/img/goods/L/4589404140509.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Matte", category: "Eye", price: 1078, url: "https://babymee.jp/", color: "#483D8B" },
+        { id: "rim_01", name: "ショコラスウィート アイズ", brand: "Rimmel", image: "www.rimmellondon.jp/item/img/chocolat_sweet_eyes.png", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1760, url: "https://www.rimmellondon.jp/", color: "#5D4037" },
+        { id: "rev_01", name: "ジェリー ティント", brand: "REVLON", image: "www.revlon-japan.com/img/item/jelly_tint.png", season: "Summer", concern: "Oily", tone: "Cool", finish: "Glow", category: "Lip", price: 1430, url: "https://www.revlon-japan.com/", color: "#FF1493" },
+        { id: "may_01", name: "スカイハイ", brand: "Maybelline", image: "www.maybelline.co.jp/img/item/skyhigh.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1639, url: "https://www.maybelline.co.jp/", color: "#000000" },
+        { id: "int_01", name: "プロフィニッシュファンデ", brand: "INTEGRATE", image: "www.shiseido.co.jp/ie/items/img/item_0001.png", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 1430, url: "https://www.shiseido.co.jp/ie/", color: "#F5DEB3" },
+        { id: "fas_01", name: "パーマネントカール マスカラ", brand: "Fasio", image: "www.kose.co.jp/fasio/item/img/mascara_01.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1320, url: "https://www.kose.co.jp/fasio/", color: "#1C1C1C" },
+        { id: "dej_01", name: "塗るつけまつげ", brand: "dejavu", image: "www.dejavu-net.jp/items/img/lashup.png", season: "Summer", concern: "Dry", tone: "Cool", finish: "Matte", category: "Eye", price: 1320, url: "https://www.dejavu-net.jp/", color: "#000000" },
+        { id: "kin_01", name: "束感カールマスカラ", brand: "Kingdom", image: "www.qtis.jp/img/goods/L/4901477040432.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1760, url: "https://www.qtis.jp/", color: "#2F4F4F" },
+        { id: "lov_01", name: "リキッドアイライナー", brand: "Love Liner", image: "loveliner.jp/img/goods/L/4580295035889.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1760, url: "https://loveliner.jp/", color: "#3E2723" },
+        { id: "uzu_01", name: "アイオープニングライナー", brand: "UZU", image: "www.uzu.team/img/goods/L/4571194364071.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Eye", price: 1650, url: "https://www.uzu.team/", color: "#FF4500" },
+        { id: "pri_01", name: "スキンプロテクトベース", brand: "Primavista", image: "www.sofina.co.jp/primavista/products/img/base_uv.png", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Base", price: 3080, url: "https://www.sofina.co.jp/primavista/", color: "#FDF5E6" },
+        { id: "ett_01", name: "アイエディション", brand: "ettusais", image: "www.ettusais.co.jp/img/item/eye_edition_palette.png", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1540, url: "https://www.ettusais.co.jp/", color: "#BC8F8F" },
+        { id: "enb_01", name: "マルチメークアップマスク", brand: "ENBAN TOKYO", image: "enban.tokyo/img/goods/L/multi_mask.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Glow", category: "Cheek", price: 1870, url: "https://enban.tokyo/", color: "#FF7F50" },
+        { id: "bor_01", name: "リッププランパー", brand: "Borica", image: "borica.jp/img/goods/L/lip_plumper.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 1980, url: "https://borica.jp/", color: "#FFF0F5" },
+
+        // --- 韓国・中国・海外バズ ---
+        { id: "rom_01", name: "ジューシーラスティングティント", brand: "rom&nd", image: "shop.viva-glow.com/cdn/shop/files/jlt-25.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 1320, url: "https://romand.co.kr/", color: "#CD5C5C" },
+        { id: "fwe_01", name: "ブラーリープリンポット", brand: "fwee", image: "fwee.jp/img/goods/L/pudding_pot.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Cheek", price: 1980, url: "https://fwee.jp/", color: "#E6E6FA" },
+        { id: "das_01", name: "シャドウパレット", brand: "dasique", image: "dasique.jp/image/product/palette_01.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 4180, url: "https://dasique.jp/", color: "#FFE4C4" },
+        { id: "cli_01", name: "プロアイパレット", brand: "CLIO", image: "cliocosmetic.jp/web/product/medium/202308/94632b700146e6a146e4b445217f2238.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Eye", price: 3740, url: "https://cliocosmetic.jp/", color: "#A0522D" },
+        { id: "per_01", name: "インク ベルベット", brand: "peripera", image: "periperacosmetic.jp/img/goods/L/ink_velvet.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Lip", price: 1320, url: "https://periperacosmetic.jp/", color: "#FF4500" },
+        { id: "amu_01", name: "デューティント", brand: "AMUSE", image: "amusemakeup.jp/img/goods/L/dew_tint.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 2200, url: "https://amusemakeup.jp/", color: "#FF69B4" },
+        { id: "hin_01", name: "ムードインハンサー", brand: "hince", image: "hince.jp/img/goods/L/water_glow.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 2350, url: "https://hince.jp/", color: "#800000" },
+        { id: "lak_01", name: "フルーティーグラムティント", brand: "Laka", image: "laka.co.kr/img/goods/L/fruity_glam.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 1980, url: "https://laka.co.kr/", color: "#FFA07A" },
+        { id: "mud_01", name: "インスパイアマスカラ", brand: "mude", image: "mude.jp/img/goods/L/mascara.jpg", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 2100, url: "https://mude.jp/", color: "#1A1A1A" },
+        { id: "wak_01", name: "ソフトブラーリングパレット", brand: "WAKEMAKE", image: "wakemake.com/img/goods/L/blurring_palette.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 3980, url: "https://wakemake.com/", color: "#EBD0C2" },
+        { id: "etu_01", name: "プレイカラーアイズ", brand: "ETUDE", image: "www.etudehouse.com/jp/ja/img/item/play_color.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 2750, url: "https://www.etudehouse.com/", color: "#DEB887" },
+        { id: "mis_01", name: "M マジッククッション", brand: "MISSHA", image: "www.missha.co.jp/img/item/magic_cushion.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Glow", category: "Base", price: 1650, url: "https://www.missha.co.jp/", color: "#FAEBD7" },
+        { id: "tir_01", name: "マスクフィット レッドクッション", brand: "TIRTIR", image: "tirtir.co.jp/cdn/shop/products/red-cushion.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 2970, url: "https://tirtir.jp/", color: "#F5F5DC" },
+        { id: "ins_01", name: "ノーセバム ミネラルパウダー", brand: "innisfree", image: "www.innisfree.jp/upload/product/12963_l.png", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Base", price: 825, url: "https://www.innisfree.jp/", color: "#FFFFFF" },
+        { id: "3ce_01", name: "ベルベット リップ ティント", brand: "3CE", image: "stylenanda.com/img/3ce/velvet_lip.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Lip", price: 1880, url: "https://stylenanda.com/", color: "#800020" },
+        { id: "esp_01", name: "プロテーラー ビーグロウ", brand: "espoir", image: "espoir.com/img/item/be_glow.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 4180, url: "https://espoir.com/", color: "#FFEBCD" },
+        { id: "flw_01", name: "サーカス グラデーションチーク", brand: "Flower Knows", image: "flowerknows.co/img/item/blush.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Cheek", price: 2860, url: "https://flowerknows.co/", color: "#FFB6C1" },
+        { id: "jud_01", name: "メタルマスカラ", brand: "JUDYDOLL", image: "judydoll.com/img/item/iron_mascara.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1650, url: "https://judydoll.com/", color: "#121212" },
+        { id: "joo_01", name: "アンバーグレイズ グロス", brand: "Joocyee", image: "joocyee.com/img/item/lip_gloss.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 1980, url: "https://joocyee.com/", color: "#D2691E" },
+        { id: "zee_01", name: "エジプトシリーズ パレット", brand: "ZEESEA", image: "zeeseacosmetics.com/img/item/egypt_palette.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Glow", category: "Eye", price: 4180, url: "https://zeeseacosmetics.com/", color: "#DAA520" },
+        { id: "per_02", name: "エクスプローラー パレット", brand: "Perfect Diary", image: "perfectdiary.com/img/item/explorer.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Matte", category: "Eye", price: 3520, url: "https://perfectdiary.com/", color: "#4B3621" },
+        { id: "int_02", name: "マッドリップ", brand: "INTO U", image: "into-u.jp/img/item/mud_lip.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Lip", price: 1430, url: "https://into-u.jp/", color: "#A52A2A" },
+        { id: "cat_01", name: "エターナルラブ リップ", brand: "CATKIN", image: "catkin.com/img/item/eternal_love.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Matte", category: "Lip", price: 2200, url: "https://catkin.com/", color: "#B22222" },
+        { id: "she_01", name: "カラーブルーム チーク", brand: "SHEGLAM", image: "sheglam.com/img/item/liquid_blush.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Glow", category: "Cheek", price: 880, url: "https://sheglam.com/", color: "#FA8072" },
+        { id: "too_01", name: "ベターザンセックス", brand: "Too Faced", image: "www.toofaced.com/img/item/bts_mascara.jpg", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 3300, url: "https://www.toofaced.com/", color: "#000000" },
+
+        // --- インフルエンサー・芸能人 ---
+        { id: "cip_01", name: "グリッターイルミネーション", brand: "CipiCipi", image: "cipicipi.jp/img/item/glitter_liner.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Eye", price: 1320, url: "https://cipicipi.jp/", color: "#FFD700" },
+        { id: "upi_01", name: "グロウアップチーク", brand: "u pink", image: "upink.jp/img/item/cheek.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Cheek", price: 1430, url: "https://upink.jp/", color: "#FF69B4" },
+        { id: "rir_01", name: "インザミラー パレット", brand: "Ririmew", image: "www.ririmew.com/product/lips/sensual-fix-tint/", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 2640, url: "https://www.ririmew.com/", color: "#8B4513" },
+        { id: "mui_01", name: "ぷくぷく涙袋タンク", brand: "muice", image: "muice.jp/img/item/tear_tank.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Eye", price: 1000, url: "https://muice.jp/", color: "#F5F5F5" },
+        { id: "won_01", name: "メタルシャワーライナー", brand: "Wonjungyo", image: "www.wonjungyobeauty.jp/image/product/toneup.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Glow", category: "Eye", price: 1650, url: "https://www.wonjungyobeauty.jp/", color: "#F0E68C" },
+
+        // --- バラエティ・ナチュラル ---
+        { id: "and_01", name: "UV プライマー", brand: "&be", image: "andbe-official.com/image/product/uv-primer.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 2750, url: "https://andbe-official.com/", color: "#FFFACD" },
+        { id: "etv_01", name: "ミネラルインナーベース", brand: "ETVOS", image: "etvos.com/img/item/treatment_base.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Base", price: 4950, url: "https://etvos.com/", color: "#F8F8FF" },
+        { id: "onl_01", name: "ミネラルピグメント", brand: "Only Minerals", image: "onlyminerals.jp/img/item/pigment.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1980, url: "https://onlyminerals.jp/", color: "#BDB76B" },
+        { id: "nat_01", name: "メイクアップ クリーム", brand: "naturaglace", image: "naturaglace.jp/img/item/makeup_cream.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 3080, url: "https://naturaglace.jp/", color: "#FAF0E6" },
+        { id: "too_02", name: "ペタル エッセンス グロス", brand: "To/one", image: "toonecosmetics.com/img/item/petal_gloss.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 2750, url: "https://toonecosmetics.com/", color: "#EE82EE" },
+        { id: "cel_01", name: "ディグニファイド リップ", brand: "Celvoke", image: "celvoke.com/img/item/dignified_lipstick.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Lip", price: 3520, url: "https://celvoke.com/", color: "#800000" },
+        { id: "sni_01", name: "フェイス スタイリスト", brand: "SNIDEL BEAUTY", image: "snidelbeauty.com/img/item/face_stylist.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Matte", category: "Cheek", price: 6380, url: "https://snidelbeauty.com/", color: "#F4A460" },
+
+        // --- デパコス・ハイブランド ---
+        { id: "dio_01", name: "マキシマイザー", brand: "Dior", image: "www.dior.com/dw/image/v2/BGXS_PRD/on/demandware.static/-/Sites-dior-master/default/dw15549007/Y0996214/Y0996214_C099600001_E01_ZHC.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 4620, url: "https://www.dior.com/", color: "#FFC0CB" },
+        { id: "jil_01", name: "ブルームクチュール アイズ", brand: "JILL STUART", image: "www.jillstuart-beauty.com/image/product/29841_1.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Eye", price: 6380, url: "https://www.jillstuart-beauty.com/", color: "#FFF0F5" },
+        { id: "pau_01", name: "モイスチュア プライマー", brand: "PAUL & JOE", image: "www.paul-joe-beaute.com/image/product/11551_1.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 3850, url: "https://www.paul-joe-beaute.com/", color: "#FAEBD7" },
+        { id: "rmk_01", name: "リクイドファンデーション", brand: "RMK", image: "onlineshop.rmkrmk.com/media/RMK/p/4973167345603.jpg", season: "Winter", concern: "Oily", tone: "Cool", finish: "Glow", category: "Base", price: 4950, url: "https://onlineshop.rmkrmk.com/", color: "#F5F5DC" },
+        { id: "add_01", name: "ザ アイシャドウ", brand: "ADDICTION", image: "www.addiction-beauty.com/site/g/gMAYA004/004SP_L.jpg", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Eye", price: 2200, url: "https://www.addiction-beauty.com/", color: "#DEB887" },
+        { id: "cha_01", name: "ルージュ ココ ボーム", brand: "CHANEL", image: "www.chanel.com/images/t_one//f_auto,q_auto,dpr_auto,w_400/rouge-coco-baume-918-my-rose-1pc-packshot-v3-171918-8851410452510.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Lip", price: 5500, url: "https://www.chanel.com/", color: "#800020" },
+        { id: "ysl_01", name: "ヴォリュプテ シャイン", brand: "YSL", image: "www.yslb.jp/makeup/makeup-lips/makeup-lipstick/rouge-volupte-shine/WW-50478YSL.html", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 5170, url: "https://www.yslb.jp/", color: "#FF007F" },
+        { id: "mac_01", name: "パウダー キス リップ", brand: "MAC", image: "www.maccosmetics.jp/product/13847/1231/makeup/face/foundation/studio-fix-fluid-spf-15", season: "Winter", concern: "Oily", tone: "Warm", finish: "Matte", category: "Lip", price: 3850, url: "https://www.maccosmetics.jp/", color: "#CD5C5C" },
+        { id: "nar_01", name: "ラディアント クリーミー", brand: "NARS", image: "www.narscosmetics.jp/light-reflecting-setting-powder-pressed/4535683134378.html", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Base", price: 4290, url: "https://www.narscosmetics.jp/", color: "#FDF5E6" },
+        { id: "shi_01", name: "モダンマット リップ", brand: "SHISEIDO", image: "brand.shiseido.co.jp/img/item/lipstick.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Lip", price: 3960, url: "https://brand.shiseido.co.jp/", color: "#B22222" },
+        { id: "shuu_01", name: "アンリミテッド ラスティング", brand: "Shu Uemura", image: "www.shuuemura.jp/base-makeup/foundation/unlimited-foundation/", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 6160, url: "https://www.shuuemura.jp/", color: "#FFE4B5" },
+        { id: "cli_02", name: "チーク ポップ", brand: "CLINIQUE", image: "www.clinique.jp/product/1593/29739/makeup/blushers/cheek-pop", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Cheek", price: 3850, url: "https://www.clinique.jp/", color: "#DA70D6" },
+        { id: "giv_01", name: "プリズム リーブル", brand: "Givenchy", image: "www.givenchybeauty.com/jp/p/prism-libre-loose-powder-P080511.html", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Base", price: 7480, url: "https://www.givenchybeauty.com/", color: "#FFFFFF" },
+        { id: "lan_01", name: "タンイドル ウルトラ ウェア", brand: "LANCÔME", image: "www.lancome.jp/makeup/face/foundation/teint-idole-ultra-wear-liquid/A01423-LAC.html", season: "Winter", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 7040, url: "https://www.lancome.jp/", color: "#FFE4E1" },
+        { id: "bob_01", name: "フェイスベース", brand: "BOBBI BROWN", image: "www.bobbibrown.jp/product/13980/7485/skincare/face-moisturizer/vitamin-enriched-face-base", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 8580, url: "https://www.bobbibrown.jp/", color: "#FFFFF0" },
+        { id: "thr_01", name: "シマリング グロウ デュオ", brand: "THREE", image: "www.threecosmetics.com/onlineshop/g/gt2a233/", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Cheek", price: 4950, url: "https://www.threecosmetics.com/", color: "#E9967A" },
+        { id: "lun_01", name: "アイカラーレーション", brand: "LUNASOL", image: "onlineshop.lunasol-official.com/media/LUNASOL/p/4973167451199.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 6820, url: "https://www.lunasol-official.com/", color: "#D2B48C" },
+        { id: "suq_01", name: "シグニチャー カラー アイズ", brand: "SUQQU", image: "onlineshop.suqqu.com/media/SUQQU/p/4973167948286.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Glow", category: "Eye", price: 7700, url: "https://onlineshop.suqqu.com/", color: "#556B2F" },
+        { id: "ele_01", name: "ラ プードル", brand: "Elégance", image: "www.elegance-cosmetics.com/products/poudre-haute-nuance", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Base", price: 11000, url: "https://www.elegance-cosmetics.com/", color: "#FFF5EE" },
+        { id: "ann_01", name: "ルース パウダー", brand: "Anna Sui", image: "annasui.co.jp/collections/makeup-face-powder/products/asabpx", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Base", price: 5500, url: "https://annasui.co.jp/", color: "#E6E6FA" },
+        { id: "tom_01", name: "アイ カラー クォード", brand: "Tom Ford", image: "www.tomford.com/beauty/eyes/eye-color-quad/", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 12650, url: "https://www.tomford.com/", color: "#8B4513" },
+        { id: "lau_01", name: "ルース セッティング パウダー", brand: "Laura Mercier", image: "www.lauramercier.jp/face/powder/translucent-loose-setting-powder-prod12320015.html", season: "Winter", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 5280, url: "https://www.lauramercier.jp/", color: "#FAF0E6" },
+        { id: "cla_01", name: "コンフォート リップオイル", brand: "Clarins", image: "www.clarins.jp/lip-oil-80084551.html", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 3850, url: "https://www.clarins.jp/", color: "#FF4500" },
+        { id: "ips_01", name: "クリエイティブコンシーラー", brand: "IPSA", image: "www.ipsa.co.jp/41551.html", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Base", price: 3850, url: "https://www.ipsa.co.jp/", color: "#FFE4B5" },
+        { id: "cle_01", name: "ヴォワールコレクチュール", brand: "Clé de Peau", image: "www.cledepeau-beaute.com/jp/base-makeup/makeup-base/pre-makeup.html", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Base", price: 7150, url: "https://www.cledepeau-beaute.com/", color: "#FFF8DC" },
+        { id: "est_01", name: "ダブル ウェア", brand: "ESTĒE LAUDER", image: "www.esteelauder.jp/product/643/3894/product-catalog/makeup/face/foundations/double-wear/stay-in-place-makeup-spf-10", season: "Winter", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 7040, url: "https://www.esteelauder.jp/", color: "#F5DEB3" },
+        { id: "gue_01", name: "メテオリット ビーユ", brand: "GUERLAIN", image: "www.guerlain.com/jp/ja-jp/p/meteorites-pearls-P044040.html", season: "Summer", concern: "Oily", tone: "Cool", finish: "Glow", category: "Base", price: 8470, url: "https://www.guerlain.com/", color: "#FFF0F5" },
+        { id: "lou_01", name: "ベルベットマット リップ", brand: "Louboutin", image: "jp.christianlouboutin.com/jp_ja/shop/beauty/velvet-matte-lip-colour-rouge-louboutin.html", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Lip", price: 13750, url: "https://jp.christianlouboutin.com/", color: "#FF0000" },
+        { id: "her_01", name: "ルージュ エルメス", brand: "Hermes", image: "www.hermes.com/jp/ja/product/rouge-hermes-satin-lipstick-rose-epice-V60001SV021/", season: "Summer", concern: "Dry", tone: "Warm", finish: "Matte", category: "Lip", price: 9020, url: "https://www.hermes.com/", color: "#FF4500" },
+        { id: "pra_01", name: "ハイパーマット リップ", brand: "Prada", image: "www.prada-beauty.jp/makeup/lips/lipstick/prada-monochrome-hyper-matte.html", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Lip", price: 6930, url: "https://www.prada-beauty.jp/", color: "#000000" },
+        { id: "vdl_01", name: "ルミレイヤー プライマー", brand: "VDL", image: "vdlcosmetics.jp/cdn/shop/products/LUMILAYERPRIMER_1.jpg", season: "Summer", concern: "Dry", tone: "Cool", finish: "Glow", category: "Base", price: 2860, url: "https://vdlcosmetics.jp/", color: "#f0f0ff" }
+    ];

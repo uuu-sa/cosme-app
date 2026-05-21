@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✦ 星空コスメシミュレーター ✦</title>
+    <!-- Tailwind CSS (基本レイアウト用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 柔らかくて手描き感のある日本語フォントと、星空に合う英字フォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           Style C: 手書き感 × 韓国っぽ星空デザイン
+           ========================================================================== */
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #fce7f3; /* 統一されたパステルピンクの背景 */
+            color: #5d4a4a; /* ココアブラウンの文字色で温かみを追加 */
+        }
+
+        /* 夢の中のような、ふんわり水彩グラデーションと星の背景デコレーション */
+        .wrapper {
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(255, 230, 240, 0.7) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(230, 230, 255, 0.7) 0%, transparent 50%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><path d="M10 5 L12 12 L19 10 L14 15 L18 20 L12 18 L10 25 L8 18 L2 20 L6 15 L1 10 L8 12 Z" fill="rgba(255, 215, 0, 0.12)"/></svg>'),
+                #fffdf9; /* 温かみのあるオフホワイト */
+            border: 4px solid #5d4a4a; /* 手描き風のココアブラウンフレーム */
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(93, 74, 74, 0.15);
+        }
+
+        /* タイトル装飾 ✦ */
+        .slide-title-stars::before {
+            content: '✦ ';
+            color: #ffd700;
+        }
+        .slide-title-stars::after {
+            content: ' ✦';
+            color: #ffd700;
+        }
+
+        /* 手書き風の不規則な丸みを持つボタン */
+        .sketch-button {
+            border: 2px solid #5d4a4a;
+            border-radius: 20px 8px 20px 8px / 8px 20px 8px 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 4px 4px 0 rgba(93, 74, 74, 0.1);
+            transition: all 0.2s ease;
+        }
+        .sketch-button:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 rgba(93, 74, 74, 0.1);
+        }
+        .sketch-button.active {
+            background-color: #fbcfe8; /* 選択時に可愛いピンクに */
+            border-color: #db2777;
+            color: #db2777;
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* 手書き風の可愛いコスメカード */
+        .cosme-card {
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 2px solid #5d4a4a;
+            border-radius: 20px 8px 20px 8px / 8px 20px 8px 20px;
+            box-shadow: 6px 6px 0 rgba(93, 74, 74, 0.1);
+            transition: all 0.2s ease;
+        }
+        .cosme-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* 可愛いストライプの予算ゲージ */
+        .stripe-progress {
+            background: repeating-linear-gradient(
+                -45deg,
+                #fbcfe8,
+                #fbcfe8 10px,
+                #f472b6 10px,
+                #f472b6 20px
+            );
+            transition: width 0.3s ease;
+        }
+
+        /* カラープレビュー窓のフチ */
+        .color-palette-window {
+            border: 3px solid #5d4a4a;
+            border-radius: 16px;
+            box-shadow: 4px 4px 0 rgba(93, 74, 74, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4 md:px-8 flex items-center justify-center">
+
+    <!-- アプリメインウィンドウ -->
+    <div class="wrapper w-full max-w-5xl p-6 md:p-10 space-y-8 relative overflow-hidden">
+        
+        <!-- ヘッダーエリア -->
+        <header class="text-center space-y-2 border-b-2 border-dashed border-[#5d4a4a]/30 pb-6">
+            <h1 class="text-3xl md:text-4xl font-bold slide-title-stars text-[#db2777]">星空コスメシミュレーター</h1>
+            <p class="text-sm md:text-base opacity-80">〜 今日の私に、一番似合う星の輝きを 〜</p>
+        </header>
+
+        <!-- メイングリッド -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- 👈 左：コントロール（入力）エリア -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- 1. 季節の選択 -->
+                <div class="bg-white/50 p-5 rounded-2xl border-2 border-[#5d4a4a] space-y-3">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span>🌤️</span> 季節の切り替え
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="btn-summer" onclick="setSeason('Summer')" class="sketch-button py-2.5 text-sm font-bold">
+                            🍉 夏 (Summer)
+                        </button>
+                        <button id="btn-winter" onclick="setSeason('Winter')" class="sketch-button py-2.5 text-sm font-bold">
+                            ⛄ 冬 (Winter)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 肌悩みの選択 -->
+                <div class="bg-white/50 p-5 rounded-2xl border-2 border-[#5d4a4a] space-y-3">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span>💧</span> 肌悩みの状態
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="btn-dry" onclick="setConcern('Dry')" class="sketch-button py-2.5 text-sm font-bold">
+                            💧 乾燥肌
+                        </button>
+                        <button id="btn-oily" onclick="setConcern('Oily')" class="sketch-button py-2.5 text-sm font-bold">
+                            ✨ テカリ肌
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. 明日の準備 (micro:bit連携仮トグル) -->
+                <div class="bg-white/50 p-5 rounded-2xl border-2 border-[#5d4a4a] space-y-3">
+                    <h3 class="text-lg font-bold flex items-center gap-2 text-[#db2777]">
+                        <span>🔌</span> Day7：外部連携 (仮)
+                    </h3>
+                    <label class="flex items-center gap-3 cursor-pointer p-1">
+                        <input type="checkbox" id="microbit-toggle" onchange="toggleMicrobitSim()" class="w-5 h-5 accent-[#db2777] rounded">
+                        <span class="text-sm font-bold text-slate-700">micro:bit湿度センサー連携</span>
+                    </label>
+                    <p class="text-[10px] text-[#5d4a4a]/70 leading-relaxed">
+                        ※チェックを入れると、明日のセンサー検知（自動で冬×乾燥肌をセレクト）を疑似体験できます。
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- 👉 右：シミュレーション（出力）エリア -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- お財布メーター ＆ カラーパレット -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- 予算とお財布お怒りメーター -->
+                    <div class="bg-white/50 p-5 rounded-2xl border-2 border-[#5d4a4a] flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold opacity-80">お財布メーター</span>
+                            <span id="wallet-tag" class="text-[10px] font-bold bg-[#ffe4e6] text-[#db2777] px-2 py-0.5 rounded-full">お買い物前</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 py-1">
+                            <!-- お怒り絵文字 -->
+                            <span id="wallet-emoji" class="text-4xl transition-all duration-300">😊</span>
+                            
+                            <!-- 進捗バー -->
+                            <div class="flex-1 space-y-1">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span>合計: <span id="total-price" class="text-sm text-[#db2777]">¥ 0</span></span>
+                                    <span class="text-[#5d4a4a]/70">予算: ¥10,000</span>
+                                </div>
+                                <div class="w-full bg-[#5d4a4a]/10 h-4 rounded-full overflow-hidden border border-[#5d4a4a]">
+                                    <div id="budget-progress" class="stripe-progress h-full w-0"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- カラープレビュー窓 -->
+                    <div class="bg-white/50 p-5 rounded-2xl border-2 border-[#5d4a4a] flex items-center justify-between">
+                        <div class="space-y-1">
+                            <span class="text-xs font-bold opacity-80 block">💄 メイクプレビュー</span>
+                            <span id="preview-cosme-name" class="text-xs font-bold text-[#db2777]">コスメを選んでね</span>
+                            <p id="preview-color-code" class="text-[10px] font-mono text-slate-400">#???</p>
+                        </div>
+                        <div id="color-palette-dot" class="color-palette-window w-16 h-16 bg-[#5d4a4a]/10 flex items-center justify-center transition-all duration-300">
+                            <!-- カラーコードが自動反映される丸窓 -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 提案コスメカード一覧 -->
+                <div class="space-y-3">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span>✦</span> あなたに一番似合う星のコスメ
+                    </h3>
+                    
+                    <div id="cosmetics-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- ここにJavaScriptで選択された条件に合うコスメが動的に挿入されます -->
+                    </div>
+                </div>
+
+                <!-- おもしろ脳内言い訳ポップアップ (予算オーバー時に出現) -->
+                <div id="excuse-box" class="hidden bg-[#ffe4e6] border-2 border-dashed border-[#db2777] p-4 rounded-xl text-center space-y-1">
+                    <p class="text-xs font-bold text-[#db2777]">🚨 予算オーバー！お財布大爆発の脳内言い訳 🚨</p>
+                    <p id="excuse-text" class="text-sm font-bold text-slate-800">「これは自分の顔を世界遺産にするための維持費だから、実質タダ！」</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- フッター -->
+        <footer class="text-center pt-6 border-t border-dashed border-[#5d4a4a]/30 text-[10px] opacity-60">
+            &copy; 2026 さち (Sachi) / デジタル総合演習 Day6 作品
+        </footer>
+    </div>
+
+    <!-- 🧠 JavaScript 🧠 -->
+    <script>
+        // 1. コスメの配列データ
+        const cosmeticsData = [
+            { 
+                id: 1, 
+                name: "手描き・保湿下地 ✨", 
+                brand: "Star Cosmetics", 
+                price: 3500, 
+                season: "Summer", 
+                concern: "Dry", 
+                color: "#f8e0e0", 
+                url: "https://www.google.com/search?q=保湿下地+プチプラ",
+                excuse: "乾燥を放置するとお肌の砂漠化でもっとお金がかかるから、実質タダ！"
+            },
+            { 
+                id: 2, 
+                name: "うるおい・リップ✦", 
+                brand: "Glow & Star", 
+                price: 2800, 
+                season: "Summer", 
+                concern: "Dry", 
+                color: "#ff99aa", 
+                url: "https://www.google.com/search?q=うるおいリップ+人気",
+                excuse: "唇がうるおっているとハッピーを呼び寄せるお守りになるから、実質タダ！"
+            },
+            { 
+                id: 3, 
+                name: "さらさら・パウダー ✦", 
+                brand: "Star Matte", 
+                price: 3000, 
+                season: "Summer", 
+                concern: "Oily", 
+                color: "#f0f8ff", 
+                url: "https://www.google.com/search?q=テカリ防止パウダー",
+                excuse: "お肌の油田を未然に防ぐ重要投資だから、必要経費ということで実質タダ！"
+            },
+            { 
+                id: 4, 
+                name: "マット・ティント ✨", 
+                brand: "Seoul Tint ✨", 
+                price: 2500, 
+                season: "Summer", 
+                concern: "Oily", 
+                color: "#cc4455", 
+                url: "https://www.google.com/search?q=韓国コスメ+マットティント",
+                excuse: "1日中メイク直ししなくてよくなる時短アイテムだから、実質タダ！"
+            },
+            { 
+                id: 5, 
+                name: "こっくり・クリーム ✨", 
+                brand: "Deep Moist ✨", 
+                price: 4000, 
+                season: "Winter", 
+                concern: "Dry", 
+                color: "#fffdf9", 
+                url: "https://www.google.com/search?q=高保湿フェイスクリーム",
+                excuse: "このクリームはもはや毎日おうちで行う高級エステ代だから、実質タダ！"
+            },
+            { 
+                id: 6, 
+                name: "美容液・ファンデ ✨", 
+                brand: "Serum Foundation", 
+                price: 4500, 
+                season: "Winter", 
+                concern: "Dry", 
+                color: "#eee0d0", 
+                url: "https://www.google.com/search?q=美容液ファンデーション+おすすめ",
+                excuse: "ファンデなのに1日中パックしてるのと同じ効果があるから、実質タダ！"
+            },
+            { 
+                id: 7, 
+                name: "テカリ防止・下地 ✦", 
+                brand: "Seoul Oil Control", 
+                price: 3200, 
+                season: "Winter", 
+                concern: "Oily", 
+                color: "#e0f0f8", 
+                url: "https://www.google.com/search?q=冬テカリ防止下地",
+                excuse: "暖房のきいた部屋でのメイク崩れを防ぐための防衛戦費。実質タダ！"
+            },
+            { 
+                id: 8, 
+                name: "パウダー・チーク ✦", 
+                brand: "Seoul Powder Cheek", 
+                price: 2800, 
+                season: "Winter", 
+                concern: "Oily", 
+                color: "#ffb6c1", 
+                url: "https://www.google.com/search?q=ふんわりチーク+韓国",
+                excuse: "これを使うと私の表情のキュートさが10倍に増幅して皆が癒やされるから、実質タダ！"
+            }
+        ];
+
+        // 2. アプリの状態 (State)
+        let selectedSeason = "Summer"; // 初期値
+        let selectedConcern = "Dry";  // 初期値
+        let activeCosmeIds = [];      // カート（計算対象）に入っているコスメID
+
+        // 3. 起動時の初期化
+        window.onload = function() {
+            setSeason('Summer');
+            setConcern('Dry');
+        };
+
+        // 季節の切り替え
+        function setSeason(season) {
+            selectedSeason = season;
+            // ボタンの見た目更新
+            document.getElementById("btn-summer").className = season === "Summer" ? "sketch-button py-2.5 text-sm font-bold active" : "sketch-button py-2.5 text-sm font-bold";
+            document.getElementById("btn-winter").className = season === "Winter" ? "sketch-button py-2.5 text-sm font-bold active" : "sketch-button py-2.5 text-sm font-bold";
+            
+            // 状態が変わったらカートを一度クリアする
+            activeCosmeIds = [];
+            updateApp();
+        }
+
+        // 肌悩みの切り替え
+        function setConcern(concern) {
+            selectedConcern = concern;
+            // ボタンの見た目更新
+            document.getElementById("btn-dry").className = concern === "Dry" ? "sketch-button py-2.5 text-sm font-bold active" : "sketch-button py-2.5 text-sm font-bold";
+            document.getElementById("btn-oily").className = concern === "Oily" ? "sketch-button py-2.5 text-sm font-bold active" : "sketch-button py-2.5 text-sm font-bold";
+            
+            // 状態が変わったらカートを一度クリアする
+            activeCosmeIds = [];
+            updateApp();
+        }
+
+        // メイン処理：データの絞り込みと画面への出力 (filter & render)
+        function updateApp() {
+            // 【処理の仕組み：Array.filter】条件に完全一致するコスメだけを抽出
+            const filteredCosmetics = cosmeticsData.filter(cosme => {
+                return cosme.season === selectedSeason && cosme.concern === selectedConcern;
+            });
+
+            // 画面のリストを再描画
+            const listContainer = document.getElementById("cosmetics-list");
+            listContainer.innerHTML = "";
+
+            filteredCosmetics.forEach(cosme => {
+                const isSelected = activeCosmeIds.includes(cosme.id);
+                const card = document.createElement("div");
+                card.className = `cosme-card p-4 transition-all duration-200 cursor-pointer ${isSelected ? 'border-2 border-[#db2777] bg-[#ffe4e6]/20' : 'border border-[#5d4a4a]'}`;
+                card.onclick = () => toggleSelectCosme(cosme.id);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full border-2 border-[#5d4a4a] flex items-center justify-center ${isSelected ? 'bg-[#db2777] border-[#db2777]' : ''}">
+                                ${isSelected ? '✓' : ''}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold">${cosme.name}</h4>
+                                <p class="text-[10px] text-slate-500 font-bold">¥ ${cosme.price.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <a href="${cosme.url}" target="_blank" onclick="event.stopPropagation();" class="text-[10px] font-bold text-white bg-[#5d4a4a] hover:bg-[#db2777] px-3 py-1.5 rounded-lg transition duration-200">
+                            公式サイト 🛍️
+                        </a>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+            // 予算計算とお財布表情の同期
+            calculateBudget(filteredCosmetics);
+        }
+
+        // コスメを選択した時、カートに入れたり外したりする
+        function toggleSelectCosme(id) {
+            const index = activeCosmeIds.indexOf(id);
+            if (index > -1) {
+                activeCosmeIds.splice(index, 1);
+            } else {
+                activeCosmeIds.push(id);
+            }
+            updateApp();
+        }
+
+        // 予算とメーターの計算 (Array.reduce の活用)
+        function calculateBudget(filteredCosmetics) {
+            // 現在選択（チェック）されているコスメの合計金額を算出する
+            const selectedItems = cosmeticsData.filter(cosme => activeCosmeIds.includes(cosme.id));
+            const total = selectedItems.reduce((sum, cosme) => sum + cosme.price, 0);
+            
+            // 画面表示更新
+            document.getElementById("total-price").innerText = `¥ ${total.toLocaleString()}`;
+            
+            // 進捗バーの割合計算
+            const percent = Math.min((total / 10000) * 100, 100);
+            document.getElementById("budget-progress").style.width = percent + "%";
+
+            // お財布のきもち・顔絵文字・言い訳ボックスの連動
+            const emojiEl = document.getElementById("wallet-emoji");
+            const tagEl = document.getElementById("wallet-tag");
+            const excuseBox = document.getElementById("excuse-box");
+            const excuseText = document.getElementById("excuse-text");
+
+            if (total === 0) {
+                emojiEl.innerText = "😊";
+                tagEl.innerText = "お買い物前";
+                tagEl.className = "text-[10px] font-bold bg-[#f1f5f9] text-slate-500 px-2 py-0.5 rounded-full";
+                excuseBox.classList.add("hidden");
+                
+                // カラープレビューを初期状態にする
+                document.getElementById("color-palette-dot").style.backgroundColor = "transparent";
+                document.getElementById("preview-color-code").innerText = "#???";
+                document.getElementById("preview-cosme-name").innerText = "コスメを選んでね";
+            } else if (total <= 5000) {
+                emojiEl.innerText = "😌";
+                tagEl.innerText = "いい感じ！";
+                tagEl.className = "text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full";
+                excuseBox.classList.add("hidden");
+            } else if (total <= 10000) {
+                emojiEl.innerText = "😳";
+                tagEl.innerText = "ちょっと焦り..";
+                tagEl.className = "text-[10px] font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full";
+                excuseBox.classList.add("hidden");
+            } else {
+                // 予算オーバー
+                emojiEl.innerText = "😱";
+                tagEl.innerText = "予算オーバー！爆発！";
+                tagEl.className = "text-[10px] font-bold bg-rose-100 text-[#db2777] px-2 py-0.5 rounded-full";
+                
+                // 言い訳を出現させる
+                excuseBox.classList.remove("hidden");
+                if (selectedItems.length > 0) {
+                    const lastItem = selectedItems[selectedItems.length - 1];
+                    excuseText.innerText = `「${lastItem.excuse}」`;
+                }
+            }
+
+            // 【プレビューカラー連動】最後に選択したコスメの色をパレットに反映
+            if (selectedItems.length > 0) {
+                const latestItem = selectedItems[selectedItems.length - 1];
+                document.getElementById("color-palette-dot").style.backgroundColor = latestItem.color;
+                document.getElementById("preview-color-code").innerText = latestItem.color.toUpperCase();
+                document.getElementById("preview-cosme-name").innerText = latestItem.name;
+            }
+        }
+
+        // 明日の準備：micro:bit連携の疑似スイッチ
+        function toggleMicrobitSim() {
+            const toggle = document.getElementById("microbit-toggle");
+            if (toggle.checked) {
+                alert("✦ micro:bitから『お部屋の湿度が30%』とのデータを受信しました！お肌の乾燥に備えて、自動的に【冬：乾燥肌】モードに切り替わります ✦");
+                setSeason("Winter");
+                setConcern("Dry");
+            }
+        }
+    </script>
+</body>
+</html>

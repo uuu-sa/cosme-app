@@ -1,0 +1,6 @@
+<!-- リップのアイコン (Lipstick) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <rect x="35" y="50" width="30" height="40" rx="2" fill="#5d4a4a" />
+  <path d="M40 50 L40 25 Q40 15 50 15 Q60 15 60 25 L60 50 Z" fill="#ff99aa" />
+  <path d="M40 35 L60 30" stroke="#fff" stroke-width="2" opacity="0.5" />
+</svg>

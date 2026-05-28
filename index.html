@@ -45,6 +45,7 @@
             box-shadow: 6px 6px 0 rgba(93, 74, 74, 0.25);
             transition: all 0.25s ease; position: relative;
         }
+        .cosme-card:hover { transform: translateY(-4px) rotate(0.5deg); }
         .cosme-card.selected { background: #fff0f5; border-color: #db2777; box-shadow: 6px 6px 0 rgba(219, 39, 119, 0.25); }
 
         .link-button {
@@ -68,9 +69,12 @@
 <body class="p-4 md:p-8">
 
 <div class="max-w-7xl mx-auto">
+    <!-- バージョン識別子 (Render更新確認用) -->
+    <div class="text-right text-[8px] opacity-30">v1.1.0-final</div>
+
     <header class="text-center mb-8 p-6 border-b-4 border-double border-[#5d4a4a]">
         <h1 class="title-with-stars text-3xl md:text-5xl font-bold uppercase tracking-widest">星空コスメシミュレーター</h1>
-        <p class="text-[10px] md:text-xs mt-3 opacity-80 font-bold">✦ 92ブランドの全データ復活：本物の写真と一緒に楽しもう ✦</p>
+        <p class="text-[10px] md:text-xs mt-3 opacity-80 font-bold">✦ 全92ブランド：最新公式リンク ＆ 本物の写真 ✦</p>
         
         <nav class="flex justify-center gap-6 md:gap-12 mt-10">
             <button id="tab-search" class="nav-tab active" onclick="switchPage('search')">✦ 診断</button>
@@ -163,7 +167,7 @@
             <h2 class="text-xl font-bold text-center title-with-stars uppercase">ガイド</h2>
             <p>1. <strong>全92ブランド復活</strong>：これまでに追加したすべてのコスメが見れます。</p>
             <p>2. <strong>写真表示</strong>：ネット上の写真が表示されるように工夫しました。写真が出ない時は可愛いアイコンが表示されます。</p>
-            <p>3. <strong>お気に入り</strong>：タップでキープ、予算に合わせてお買い物シミュレーション。</p>
+            <p>3. <strong>公式リンク</strong>：詳細ボタンから各ブランドの公式サイトへ飛べます。</p>
         </section>
     </div>
 
@@ -197,7 +201,6 @@
         { id: "revlon", name: "ジェリー ティント", brand: "REVLON", image: "https://www.revlon-japan.com/img/item/jelly_tint.png", season: "Summer", concern: "Oily", tone: "Cool", finish: "Glow", category: "Lip", price: 1430, url: "https://www.revlon-japan.com/", color: "#FF1493" },
         { id: "maybelline", name: "スカイハイ", brand: "Maybelline", image: "https://www.maybelline.co.jp/img/item/skyhigh.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1639, url: "https://www.maybelline.co.jp/", color: "#000000" },
         { id: "integrate", name: "プロフィニッシュ", brand: "INTEGRATE", image: "https://www.shiseido.co.jp/ie/items/img/item_0001.png", season: "Summer", concern: "Oily", tone: "Warm", finish: "Matte", category: "Base", price: 1430, url: "https://www.shiseido.co.jp/ie/", color: "#F5DEB3" },
-        { id: "integrate-eyebrow", name: "ふわ眉パウダー", brand: "INTEGRATE", image: "https://www.shiseido.co.jp/ie/items/img/item_0012.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1100, url: "https://www.shiseido.co.jp/ie/", color: "#8B4513" },
         { id: "fasio", name: "パーマネントカール", brand: "Fasio", image: "https://www.kose.co.jp/fasio/item/img/mascara_01.png", season: "Winter", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1320, url: "https://www.kose.co.jp/fasio/", color: "#1C1C1C" },
         { id: "dejavu", name: "塗るつけまつげ", brand: "dejavu", image: "https://www.dejavu-net.jp/items/img/lashup.png", season: "Summer", concern: "Dry", tone: "Cool", finish: "Matte", category: "Eye", price: 1320, url: "https://www.dejavu-net.jp/", color: "#000000" },
         { id: "kingdom", name: "カールマスカラ", brand: "Kingdom", image: "https://www.qtis.jp/img/goods/L/4901477040432.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Eye", price: 1760, url: "https://www.qtis.jp/", color: "#2F4F4F" },
@@ -222,7 +225,7 @@
         { id: "tirtir", name: "レッドクッション", brand: "TIRTIR", image: "https://tirtir.co.jp/cdn/shop/products/red-cushion.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 2970, url: "https://tirtir.jp/", color: "#F5F5DC" },
         { id: "innisfree", name: "ノーセバム パウダー", brand: "innisfree", image: "https://www.innisfree.jp/upload/product/12963_l.png", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Base", price: 825, url: "https://www.innisfree.jp/", color: "#FFFFFF" },
         { id: "3ce", name: "ベルベット リップ", brand: "3CE", image: "https://stylenanda.com/img/3ce/velvet_lip.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Lip", price: 1880, url: "https://stylenanda.com/", color: "#800020" },
-        { id: "espoir", name: "プロテーラー", brand: "espoir", image: "https://espoir.com/img/item/be_glow.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 4180, url: "https://espoir.com/", color: "#FFEBCD" },
+        { id: "espoir", name: "プロテーラー", brand: "espoir", image: "https://espoir.com/img/item/be_glow.jpg", season: "Summer", concern: "Dry", tone: "Warm", finish: "Glow", category: "Base", price: 4180, url: "https://www.espoir.com/jp/main.do", color: "#FFEBCD" },
         { id: "flowerknows", name: "サーカス チーク", brand: "Flower Knows", image: "https://flowerknows.co/img/item/blush.jpg", season: "Winter", concern: "Dry", tone: "Cool", finish: "Matte", category: "Cheek", price: 2860, url: "https://flowerknows.co/", color: "#FFB6C1" },
         { id: "judydoll", name: "メタルマスカラ", brand: "JUDYDOLL", image: "https://judydoll.com/img/item/iron_mascara.jpg", season: "Summer", concern: "Oily", tone: "Cool", finish: "Matte", category: "Eye", price: 1650, url: "https://judydoll.com/", color: "#121212" },
         { id: "joocyee", name: "アンバーグレイズ", brand: "Joocyee", image: "https://joocyee.com/img/item/lip_gloss.jpg", season: "Winter", concern: "Dry", tone: "Warm", finish: "Glow", category: "Lip", price: 1980, url: "https://joocyee.com/", color: "#D2691E" },
@@ -325,8 +328,8 @@
                     <p class="text-[8px] opacity-60 mb-2">${c.brand}</p>
                     <span class="text-xs font-bold text-rose-600">¥ ${c.price.toLocaleString()}</span>
                 </div>
-                <div class="mt-4 pt-2 border-t border-[#5d4a4a]/10">
-                    <a href="${c.url}" target="_blank" class="link-button w-full text-center">詳細 🛍️</a>
+                <div class="mt-4 pt-2 border-t border-[#5d4a4a]/10 text-center">
+                    <a href="${c.url}" target="_blank" class="link-button w-full">詳細 🛍️</a>
                 </div>
             `;
             list.appendChild(card);
@@ -360,7 +363,8 @@
         const pct = Math.min((total / budget) * 100, 100);
         document.getElementById('budget-bar-fill').style.width = `${pct}%`;
         document.getElementById('total-percent').textContent = `${Math.round(pct)}%`;
-        document.getElementById('odor-meter').textContent = total === 0 ? '😊' : pct < 80 ? '😌' : pct < 100 ? '😳' : '😱';
+        const odor = total === 0 ? '😊' : pct < 80 ? '😌' : pct < 100 ? '😳' : '😱';
+        document.getElementById('odor-meter').textContent = odor;
         document.getElementById('color-preview-circle').style.background = `radial-gradient(circle, ${cartItems.length ? cartItems[cartItems.length - 1].color : '#fff'} 0%, #fff 100%)`;
         document.getElementById('color-code').textContent = cartItems.length ? cartItems[cartItems.length - 1].color.toUpperCase() : '#???';
     }
@@ -385,5 +389,4 @@
     update();
 </script>
 </body>
-</html>dy>
 </html>
